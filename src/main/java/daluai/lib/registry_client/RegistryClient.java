@@ -3,13 +3,16 @@ package daluai.lib.registry_client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import daluai.lib.network_utils.ApiKeyInterceptor;
 import daluai.lib.network_utils.HttpMethod;
 import daluai.lib.network_utils.RequestResult;
+import daluai.lib.registry_api.Coms;
 import daluai.lib.registry_api.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 
 import static daluai.lib.network_utils.HttpRequestUtils.queryHttpRequest;
 import static daluai.lib.network_utils.HttpRequestUtils.sendHttpRequest;
@@ -27,6 +30,8 @@ import static daluai.lib.registry_api.Coms.REGISTRY_LOCAL_URL;
 public class RegistryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegistryClient.class);
+
+    private static final ApiKeyInterceptor API_KEY_INTERCEPTOR = new ApiKeyInterceptor(Coms.API_KEY);
 
     public static final RegistryClient PUBLIC_INSTANCE = new RegistryClient();
     public static final RegistryClient LOCAL_INSTANCE = new RegistryClient(true);
@@ -58,24 +63,24 @@ public class RegistryClient {
             return RequestResult.FAIL;
         }
 
-        return sendHttpRequest(registryUrl, HttpMethod.POST, ENDPOINT_REGISTER, serviceJson);
+        return sendHttpRequest(registryUrl, HttpMethod.POST, ENDPOINT_REGISTER, serviceJson, API_KEY_INTERCEPTOR);
     }
 
     public RequestResult deregister(String serviceName) {
-        return sendHttpRequest(registryUrl, HttpMethod.GET, ENDPOINT_DEREGISTER + "/" + serviceName);
+        return sendHttpRequest(registryUrl, HttpMethod.GET, ENDPOINT_DEREGISTER + "/" + serviceName, API_KEY_INTERCEPTOR);
     }
 
     public Service retrieve(String serviceName) {
-        return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE + "/" + serviceName, Service.class);
+        return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE + "/" + serviceName, Service.class, null, List.of(API_KEY_INTERCEPTOR));
     }
 
     @SuppressWarnings("unchecked")
     public HashMap<String, Service> retrieveAll() {
         var hashMapType = TypeFactory.defaultInstance().constructParametricType(HashMap.class, String.class, Service.class);
-        return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE_ALL, hashMapType);
+        return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE_ALL, hashMapType, null, List.of(API_KEY_INTERCEPTOR));
     }
 
     public RequestResult reset() {
-        return sendHttpRequest(registryUrl, HttpMethod.GET, ENDPOINT_RESET);
+        return sendHttpRequest(registryUrl, HttpMethod.GET, ENDPOINT_RESET, API_KEY_INTERCEPTOR);
     }
 }

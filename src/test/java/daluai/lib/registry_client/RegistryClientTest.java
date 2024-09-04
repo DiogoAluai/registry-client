@@ -47,6 +47,9 @@ public class RegistryClientTest {
 	@Test
 	public void testDeregister() {
 		client.register(TEST_SERVICE);
+		Service retrievedTestService = client.retrieve(TEST_SERVICE.name());
+		assertEquals(retrievedTestService, TEST_SERVICE);
+
 		client.deregister(TEST_SERVICE.name());
 		assertNull(client.retrieve(TEST_SERVICE.name()));
 	}

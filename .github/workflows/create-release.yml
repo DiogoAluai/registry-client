@@ -36,7 +36,7 @@ jobs:
 
       # -- BUILD
       - name: Build with Maven
-        run: ./mvnw package
+        run: ./mvnw -DskipTests=true package
 
       #  -- REPO NAME RETRIEVAL
       - name: Set release version

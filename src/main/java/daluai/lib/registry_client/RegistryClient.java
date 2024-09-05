@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import daluai.lib.network_utils.ApiKeyInterceptor;
 import daluai.lib.network_utils.HttpMethod;
 import daluai.lib.network_utils.RequestResult;
-import daluai.lib.registry_api.Coms;
 import daluai.lib.registry_api.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ public class RegistryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegistryClient.class);
 
-    private static final ApiKeyInterceptor API_KEY_INTERCEPTOR = new ApiKeyInterceptor(Coms.API_KEY);
+    private static final ApiKeyInterceptor API_KEY_INTERCEPTOR = new ApiKeyInterceptor();
 
     public static final RegistryClient PUBLIC_INSTANCE = new RegistryClient();
     public static final RegistryClient LOCAL_INSTANCE = new RegistryClient(true);

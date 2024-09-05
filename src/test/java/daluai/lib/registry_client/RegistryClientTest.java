@@ -12,7 +12,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 /**
- * Assumes registry service is deployed locally
+ * Assumes registry service is deployed locally, and using the same api.key defined in config.properties resource file.
  */
 public class RegistryClientTest {
 

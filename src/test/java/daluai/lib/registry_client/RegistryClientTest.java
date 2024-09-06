@@ -1,5 +1,8 @@
 package daluai.lib.registry_client;
 
+import daluai.lib.network_utils.EncryptedApiKeyInterceptor;
+import daluai.lib.network_utils.property.PropertyKeys;
+import daluai.lib.network_utils.property.PropertyManager;
 import daluai.lib.registry_api.Service;
 import daluai.lib.registry_api.ServiceType;
 import org.junit.Before;
@@ -12,7 +15,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 /**
- * Assumes registry service is deployed locally, and using the same api.key defined in config.properties resource file.
+ * Assumes registry service is deployed locally, and using the same api.key defined in testconfig.properties resource file.
  */
 public class RegistryClientTest {
 
@@ -21,7 +24,12 @@ public class RegistryClientTest {
 	public static final Service TEST_RESCIVE = new Service(
 			"dsa", "dsb", "dsc", "dsd", ServiceType.CLOUD);
 
-	private static final RegistryClient client = RegistryClient.LOCAL_INSTANCE;
+	private static final RegistryClient client = new RegistryClient(
+			new EncryptedApiKeyInterceptor(
+					PropertyManager.of("testconfig.properties"),
+					PropertyKeys.REGISTRY_API_KEY,
+					PropertyKeys.REGISTRY_API_KEY_AES_SECRET)
+	);
 
 	@Test
 	public void checkSanity() {

@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract class that registers itself as a service to the registry.
- * Todo:
  */
 public abstract class AbstractRegisteredDaluaiService {
 
@@ -51,18 +50,18 @@ public abstract class AbstractRegisteredDaluaiService {
     }
 
     /**
-     * Send register command and set derigister hook for app shutdown
+     * Send register command and set deregister hook for app shutdown
      */
     protected void registerService(Service service) {
-        LOG.info("Registering service in registry: " + service);
-        RegistryClient.PUBLIC_INSTANCE.register(service);
+        LOG.info("Registering service in registry: {}", service);
+        RegistryClient.get().register(service);
         privateIp = service.privateIp();
         setUnregisterShutdownHook(service);
         EXECUTOR_SERVICE.scheduleAtFixedRate(() -> {
             // ~ private ip may change, so let's check now and then and keep registry updated
             String newPrivateIp = LocalIpProbe.firstActiveIPv4Address();
             if (!privateIp.equals(newPrivateIp)) {
-                LOG.info("IP address has changed from " + privateIp + " to " + newPrivateIp);
+                LOG.info("IP address has changed from {} to {}", privateIp, newPrivateIp);
                 privateIp = newPrivateIp;
                 registerService(new Service(
                         service.name(),
@@ -72,7 +71,7 @@ public abstract class AbstractRegisteredDaluaiService {
                         service.type())
                 );
             } else {
-                LOG.info("Private ip unchanged: " + privateIp);
+                LOG.info("Private ip unchanged: {}", privateIp);
             }
         }, 0, 1, TimeUnit.MINUTES);
     }
@@ -84,10 +83,10 @@ public abstract class AbstractRegisteredDaluaiService {
     protected void setUnregisterShutdownHook(Service service) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			try {
-                RegistryClient.PUBLIC_INSTANCE.deregister(service.name());
-                LOG.info("Unregistering service in registry: " + service);
+                RegistryClient.get().deregister(service.name());
+                LOG.info("Unregistering service in registry: {}", service);
             } catch (Exception e) {
-                LOG.error("Failed unregistering service in registry: " + service);
+                LOG.error("Failed unregistering service in registry: {}", service);
 			}
 		}));
     }

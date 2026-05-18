@@ -18,8 +18,6 @@ import static daluai.lib.registry_api.Coms.ENDPOINT_REGISTER;
 import static daluai.lib.registry_api.Coms.ENDPOINT_RESET;
 import static daluai.lib.registry_api.Coms.ENDPOINT_RETRIEVE;
 import static daluai.lib.registry_api.Coms.ENDPOINT_RETRIEVE_ALL;
-import static daluai.lib.registry_api.Coms.REGISTRY_CLOUD_URL;
-import static daluai.lib.registry_api.Coms.REGISTRY_LOCAL_URL;
 
 /**
  * Client for accessing registry through the network.
@@ -28,25 +26,23 @@ public class RegistryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegistryClient.class);
 
-    public static final RegistryClient PUBLIC_INSTANCE = new RegistryClient();
-    public static final RegistryClient LOCAL_INSTANCE = new RegistryClient(true);
+    public static final RegistryClient INSTANCE = new RegistryClient();
 
     private final String registryUrl;
 
     RegistryClient() {
-        this(false);
+        this(System.getenv("registry.url"));
     }
 
-    RegistryClient(boolean isLocal) {
-        registryUrl = isLocal ? REGISTRY_LOCAL_URL : REGISTRY_CLOUD_URL;
+    /**
+     * For test purposes
+     */
+    RegistryClient(String registryUrl) {
+        this.registryUrl = registryUrl;
     }
 
     public static RegistryClient get() {
-        return PUBLIC_INSTANCE;
-    }
-
-    public static RegistryClient get(boolean local) {
-        return local ? LOCAL_INSTANCE : PUBLIC_INSTANCE;
+        return INSTANCE;
     }
 
     public RequestResult register(Service service) {
@@ -69,10 +65,9 @@ public class RegistryClient {
         return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE + "/" + serviceName, Service.class);
     }
 
-    @SuppressWarnings("unchecked")
     public HashMap<String, Service> retrieveAll() {
         var hashMapType = TypeFactory.defaultInstance().constructParametricType(HashMap.class, String.class, Service.class);
-        return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE_ALL, hashMapType);
+        return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE_ALL, hashMapType); // why not simply Map instead of HashMap?
     }
 
     public RequestResult reset() {

@@ -2,7 +2,6 @@ package daluai.lib.registry_client;
 
 import daluai.lib.network_utils.LocalIpProbe;
 import daluai.lib.registry_api.Service;
-import daluai.lib.registry_api.ServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,31 +20,12 @@ public abstract class AbstractRegisteredDaluaiService {
 
     private String privateIp;
 
-    public AbstractRegisteredDaluaiService(String name, String port, ServiceType type) {
-        this(name, "", port, type);
-    }
-
-    public AbstractRegisteredDaluaiService(String name, String port, ServiceType type, String protocol) {
-        this(name, "", port, type, protocol);
-    }
-
-    public AbstractRegisteredDaluaiService(String name, String publicUrl, String port, ServiceType type) {
+    public AbstractRegisteredDaluaiService(String name) {
+        this.privateIp = LocalIpProbe.firstActiveIPv4Address();
         registerService(new Service(
                 name,
-                LocalIpProbe.firstActiveIPv4Address(),
-                publicUrl,
-                port,
-                type
-        ));
-    }
-    public AbstractRegisteredDaluaiService(String name, String publicUrl, String port, ServiceType type, String protocol) {
-        registerService(new Service(
-                name,
-                LocalIpProbe.firstActiveIPv4Address(),
-                publicUrl,
-                port,
-                type,
-                protocol
+                privateIp,
+                true
         ));
     }
 
@@ -55,7 +35,6 @@ public abstract class AbstractRegisteredDaluaiService {
     protected void registerService(Service service) {
         LOG.info("Registering service in registry: {}", service);
         RegistryClient.get().register(service);
-        privateIp = service.privateIp();
         setUnregisterShutdownHook(service);
         EXECUTOR_SERVICE.scheduleAtFixedRate(() -> {
             // ~ private ip may change, so let's check now and then and keep registry updated
@@ -66,14 +45,12 @@ public abstract class AbstractRegisteredDaluaiService {
                 registerService(new Service(
                         service.name(),
                         newPrivateIp,
-                        service.publicIp(),
-                        service.port(),
-                        service.type())
-                );
+                        true
+                ));
             } else {
                 LOG.info("Private ip unchanged: {}", privateIp);
             }
-        }, 0, 1, TimeUnit.MINUTES);
+        }, 0, 1, TimeUnit.HOURS);
     }
 
     /**
@@ -83,8 +60,9 @@ public abstract class AbstractRegisteredDaluaiService {
     protected void setUnregisterShutdownHook(Service service) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			try {
-                RegistryClient.get().deregister(service.name());
                 LOG.info("Unregistering service in registry: {}", service);
+                RegistryClient.get().deregister(service.name());
+                LOG.info("Done unregistering");
             } catch (Exception e) {
                 LOG.error("Failed unregistering service in registry: {}", service);
 			}

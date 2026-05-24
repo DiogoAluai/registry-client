@@ -1,6 +1,7 @@
 package daluai.lib.registry_client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import daluai.lib.network_utils.HttpMethod;
@@ -9,7 +10,7 @@ import daluai.lib.registry_api.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.List;
 
 import static daluai.lib.network_utils.HttpRequestUtils.queryHttpRequest;
 import static daluai.lib.network_utils.HttpRequestUtils.sendHttpRequest;
@@ -65,9 +66,9 @@ public class RegistryClient {
         return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE + "/" + serviceName, Service.class);
     }
 
-    public HashMap<String, Service> retrieveAll() {
-        var hashMapType = TypeFactory.defaultInstance().constructParametricType(HashMap.class, String.class, Service.class);
-        return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE_ALL, hashMapType); // why not simply Map instead of HashMap?
+    public List<Service> retrieveAll() {
+        JavaType listType = TypeFactory.defaultInstance().constructParametricType(List.class, Service.class);
+        return queryHttpRequest(registryUrl, ENDPOINT_RETRIEVE_ALL, listType); // why not simply Map instead of HashMap?
     }
 
     public RequestResult reset() {

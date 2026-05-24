@@ -1,15 +1,15 @@
 package daluai.lib.registry_client;
 
 import daluai.lib.registry_api.Service;
-import daluai.lib.registry_api.ServiceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Assumes registry service is deployed locally
@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class RegistryClientTest {
 
 	public static final Service TEST_SERVICE = new Service(
-			"asd", "bsd", "csd", "dsd", ServiceType.PRIVATE);
+			"asd", "bsd", true);
 	public static final Service TEST_RESCIVE = new Service(
-			"dsa", "dsb", "dsc", "dsd", ServiceType.CLOUD);
+			"dsa", "dsb", false);
 
 	private static final RegistryClient LOCAL_REGISTRY = new RegistryClient("http://localhost:8080");
 
@@ -55,8 +55,8 @@ public class RegistryClientTest {
 	public void testRetrieveAll() {
 		LOCAL_REGISTRY.register(TEST_SERVICE);
 		LOCAL_REGISTRY.register(TEST_RESCIVE);
-        HashMap<String, Service> serviceHashMap = LOCAL_REGISTRY.retrieveAll();
-		assertEquals(TEST_SERVICE, serviceHashMap.get(TEST_SERVICE.name()));
-		assertEquals(TEST_RESCIVE, serviceHashMap.get(TEST_RESCIVE.name()));
+        List<Service> serviceList = LOCAL_REGISTRY.retrieveAll();
+		assertTrue(serviceList.contains(TEST_SERVICE));
+		assertTrue(serviceList.contains(TEST_RESCIVE));
 	}
 }

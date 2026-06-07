@@ -32,7 +32,7 @@ public class RegistryClient {
     private final String registryUrl;
 
     RegistryClient() {
-        this(System.getenv("registry.url"));
+        this(System.getProperty("registry.url","http://reginald.local:64735"));
     }
 
     /**
